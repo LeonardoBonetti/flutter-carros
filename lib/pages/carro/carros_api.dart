@@ -20,7 +20,8 @@ class CarrosApi {
       "Authorization": "Bearer ${user.token}",
     };
 
-    var response = await http.get("https://carros-springboot.herokuapp.com/api/v2/carros/tipo/$tipo", headers: headers);
+    var response =
+        await http.get("httpsxx://carros-springboot.herokuapp.com/api/v2/carros/tipo/$tipo", headers: headers);
 
     List mapResponse = json.decode(response.body);
     List<Carro> carros = mapResponse.map<Carro>((e) => Carro.fromJson(e)).toList();
