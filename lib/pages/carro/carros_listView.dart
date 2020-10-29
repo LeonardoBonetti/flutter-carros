@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:carros/pages/carro/carro.dart';
+import 'package:carros/pages/carro/carro_page.dart';
 import 'package:carros/pages/carro/carros_api.dart';
+import 'package:carros/pages/carro/carros_bloc.dart';
+import 'package:carros/utils/nav.dart';
+import 'package:carros/widgets/text_error.dart';
 import 'package:flutter/material.dart';
 
 class CarrosListView extends StatefulWidget {
   String tipoCarro;
-
   CarrosListView(this.tipoCarro);
 
   @override
@@ -12,29 +17,29 @@ class CarrosListView extends StatefulWidget {
 }
 
 class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAliveClientMixin<CarrosListView> {
+  List<Carro> carros;
+  String get tipoCarro => widget.tipoCarro;
+  final _bloc = CarrosBloc();
+
   @override
   bool get wantKeepAlive => true;
 
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return _body();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _bloc.fetch(tipoCarro);
   }
 
-  _body() {
-    Future<List<Carro>> future = CarrosApi.getCarros(widget.tipoCarro);
-    return FutureBuilder(
-      future: future,
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return StreamBuilder(
+      stream: _bloc.stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Não foi possível buscar os dados",
-              style: TextStyle(color: Colors.red, fontSize: 20),
-            ),
-          );
+          return TextError("Não foi possível buscar os dados");
         }
-
         if (!snapshot.hasData) {
           return Center(
             child: CircularProgressIndicator(),
@@ -84,9 +89,7 @@ class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAlive
                       children: <Widget>[
                         FlatButton(
                           child: Text('Detalhes'),
-                          onPressed: () {
-                            print('pressed');
-                          },
+                          onPressed: () => _onClickCarro(c),
                         ),
                         FlatButton(
                           child: Text('Share'),
@@ -104,5 +107,16 @@ class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAlive
         },
       ),
     );
+  }
+
+  _onClickCarro(Carro c) {
+    push(context, CarroPage(c));
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _bloc.dispose();
   }
 }

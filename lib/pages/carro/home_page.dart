@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               children: [
                 CarrosListView(TipoCarro.luxo),
                 CarrosListView(TipoCarro.esportivos),
-                CarrosListView(TipoCarro.luxo),
+                CarrosListView(TipoCarro.classicos),
               ],
             ),
       drawer: DrawerList(),

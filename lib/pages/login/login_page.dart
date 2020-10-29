@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:carros/pages/login/login_bloc.dart';
 import 'package:carros/pages/login/usuario.dart';
 import 'package:carros/utils/alert.dart';
 import 'package:carros/utils/nav.dart';
@@ -17,9 +20,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _tLogin = TextEditingController();
   final _tPassword = TextEditingController();
+
   final _focusSenha = FocusNode();
   final _formKey = GlobalKey<FormState>();
-  bool _showProgress = false;
+
+  final _bloc = LoginBloc();
+
   @override
   void initState() {
     super.initState();
@@ -73,11 +79,16 @@ class _LoginPageState extends State<LoginPage> {
               focus: _focusSenha,
             ),
             SizedBox(height: 20),
-            AppButton(
-              "Login",
-              onPressed: _onClickLogin,
-              showProgress: _showProgress,
-            )
+            StreamBuilder<bool>(
+                stream: _bloc.buttonBloc.stream,
+                initialData: false,
+                builder: (context, snapshot) {
+                  return AppButton(
+                    "Login",
+                    onPressed: _onClickLogin,
+                    showProgress: snapshot.data,
+                  );
+                })
           ],
         ),
       ),
@@ -106,10 +117,7 @@ class _LoginPageState extends State<LoginPage> {
     String login = _tLogin.text;
     String password = _tPassword.text;
 
-    setState(() {
-      _showProgress = true;
-    });
-    ApiResponse loginResponse = await LoginApi.login(login, password);
+    ApiResponse loginResponse = await _bloc.login(login, password);
 
     if (loginResponse.ok) {
       Usuario user = loginResponse.result;
@@ -117,8 +125,12 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       alert(context, loginResponse.msg);
     }
-    setState(() {
-      _showProgress = false;
-    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _bloc.dispose();
   }
 }
